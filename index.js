@@ -6,7 +6,13 @@ const path = require('path')
 
 const filePath = path.join(__dirname, 'db.json')
 
-app.use(express.json())
+async function readfileWithDelay(){
+    await new Promise((resolve , reject)=>{
+        setTimeout(resolve,1500)
+    })
+    await readfile()
+}
+
 
 async function readfile() {
     const data = await fs.readFile(filePath, 'utf-8')
@@ -29,6 +35,8 @@ app.get('/product/:id', async (req, res) => {
     }
 
 })
+
+
 
 
 app.listen(3000, () => {
