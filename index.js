@@ -6,23 +6,55 @@ const path = require('path')
 
 const filePath = path.join(__dirname, 'db.json')
 
-async function readfileWithDelay(){
-    await new Promise((resolve , reject)=>{
-        setTimeout(resolve,1500)
-    })
-    await readfile()
-}
+// Cache
+const cache = {}
 
 
 async function readfile() {
+
     const data = await fs.readFile(filePath, 'utf-8')
+
     return JSON.parse(data)
 }
+
+
+async function readfileWithDelay() {
+
+    await new Promise((resolve) => {
+        setTimeout(resolve, 1500)
+    })
+
+    return readfile()
+}
+
+
 app.get('/products', async (req, res) => {
-    const products = await readfile()
-    res.json(products)
+
+    try {
+
+        const key = req.url
+        const value = cache[key]
+
+        if (value) {
+            console.log("Getting from cache")
+            return res.json(value)
+        }
+
+        const products = await readfileWithDelay()
+
+        cache[key] = products
+          res.json(products)
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).send('Server error')
+
+    }
 })
+
+
 app.get('/product/:id', async (req, res) => {
+
     const { id } = req.params
     const products = await readfile()
     const product = products.find(
@@ -35,9 +67,6 @@ app.get('/product/:id', async (req, res) => {
     }
 
 })
-
-
-
 
 app.listen(3000, () => {
     console.log("SERVER START AT LOCALHOST 3000")
