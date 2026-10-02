@@ -10,5 +10,3 @@ app.use('/product', productRoutes);
 app.listen(3000, () => {
   console.log('SERVER START AT LOCALHOST 3000');
 });
-
-module.exports = app;
